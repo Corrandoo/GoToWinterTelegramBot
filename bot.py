@@ -91,6 +91,7 @@ def handle_unsubscribe_goto_timetable(message):
             users.remove(message.chat.id)
             bot.send_message(message.chat.id, "Вы удалены из рассылки расписания GoTo.")
             removeUserFromList()
+            return
     bot.send_message(message.chat.id, "Вы уже удалялись из рассылки расписания GoTo.")
 @bot.message_handler(commands=["start", "help"])
 def welcome_message(message):
