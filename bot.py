@@ -49,6 +49,7 @@ def checkEventNow(event):
         nminute = now_time.minute
         ehours = event['time'].split(":")[0]
         eminutes = event['time'].split(":")[1]
+        print(nminute)
         if str(nhour) == str(ehours) and str(nminute) == str(eminutes):
             return event
         return False
@@ -90,21 +91,23 @@ def handle_unsubscribe_goto_timetable(message):
             bot.send_message(message.chat.id, "Вы удалены из рассылки расписания GoTo.")
             removeUserFromList()
     bot.send_message(message.chat.id, "Вы уже удалялись из рассылки расписания GoTo.")
+@bot.message_handler(commands=["start", "help"])
+def welcome_message(message):
+    bot.send_message(message.chat.id, "Привет! Я - бот расписания школы GoTo!")
+    bot.send_message(message.chat.id, "Я отсылаю информацию о каждом событии во время его начала.")
+    bot.send_message(message.chat.id, "Напишите /subscribe, чтобы подписаться на рассылку. /unsubscribe, чтобы отписаться")
+    bot.send_message(message.chat.id, "Напишите /howedit , чтобы получить справку о том, как меня заполнять.")
+@bot.message_handler(commands=["howedit"])
+def printGuide(message):
+    bot.send_message(message.chat.id, "Для редактирования рассылаемого расписания используйте файл timetable.txt")
+    bot.send_message(message.chat.id, "Каждое событие пишется с новой строки.")
+    bot.send_message(message.chat.id, "Между часами и минутами ставится двоеточие.")
+    bot.send_message(message.chat.id, "Если количество часов или минут меньше 10, то кол-во часов и минут пишется без нуля")
+    bot.send_message(message.chat.id, "Между временем события и его названием ставится =")
+    bot.send_message(message.chat.id, "Пример: 8:5=Подъем!")
+    bot.send_message(message.chat.id, "11:25=Перерыв")
 
 
-
-'''@bot.message_handler(commands=['changehumor7712'])
-def handle_changeHumor_message(message):
-    sent = bot.send_message(message.chat.id, "Введите уровень юмора от 0 до 2")
-    bot.register_next_step_handler(sent, get_humor_level)
-
-def get_humor_level(message):
-    global botHumor
-    if int(message.getText()) > 2 or int(message.getText()) < 0:
-        botHumor = 0
-        bot.send_message(message.chat.id, "Вы указали неправильный уровень юмора. Текущий равен 0.")
-    else:
-        botHumor = int(message.getText())'''
 def polling():
     bot.polling(none_stop=True)
 
