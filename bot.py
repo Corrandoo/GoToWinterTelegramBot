@@ -49,9 +49,11 @@ def checkEventNow(event):
         nminute = now_time.minute
         ehours = event['time'].split(":")[0]
         eminutes = event['time'].split(":")[1]
-        print(nminute)
         if str(nhour) == str(ehours) and str(nminute) == str(eminutes):
             return event
+        if int(eminutes) - int(nminute) == 5 or (int(eminutes) == 0 and int(ehours) - int(nhour) == 1 and int(nminute) - int(eminutes) == 55):
+            for user in users:
+                bot.send_message(user, "Внимание! Событие " + event['name'] + " начинается через 5 минут!")
         return False
     except:
         pass
@@ -59,7 +61,6 @@ def eventWriter():
     global schedule
     while True:
         for event in schedule:
-            print(event)
             if checkEventNow(event) == False:
                 pass
             else:
@@ -97,6 +98,7 @@ def welcome_message(message):
     bot.send_message(message.chat.id, "Я отсылаю информацию о каждом событии во время его начала.")
     bot.send_message(message.chat.id, "Напишите /subscribe, чтобы подписаться на рассылку. /unsubscribe, чтобы отписаться")
     bot.send_message(message.chat.id, "Напишите /howedit , чтобы получить справку о том, как меня заполнять.")
+    bot.send_message(message.chat.id, "Напишите /timetable , чтобы получить все расписание на сегодня.")
 @bot.message_handler(commands=["howedit"])
 def printGuide(message):
     bot.send_message(message.chat.id, "Для редактирования рассылаемого расписания используйте файл timetable.txt")
@@ -107,6 +109,12 @@ def printGuide(message):
     bot.send_message(message.chat.id, "Пример: 8:5=Подъем!")
     bot.send_message(message.chat.id, "11:25=Перерыв")
 
+@bot.message_handler(commands=["timetable"])
+def printTimetable(message):
+    user = message.chat.id
+    for event in schedule:
+        bot.send_message(user, event['time'] + " " + event['name'])
+        time.sleep(0.5)
 
 def polling():
     bot.polling(none_stop=True)
