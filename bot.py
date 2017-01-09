@@ -51,7 +51,7 @@ def checkEventNow(event):
         eminutes = event['time'].split(":")[1]
         if str(nhour) == str(ehours) and str(nminute) == str(eminutes):
             return event
-        if int(eminutes) - int(nminute) == 5 or (int(eminutes) == 0 and int(ehours) - int(nhour) == 1 and int(nminute) - int(eminutes) == 55):
+        if int(eminutes) - int(nminute) == 5 and int(ehours) - int(nhour) == 0 or (int(eminutes) == 0 and int(ehours) - int(nhour) == 1 and int(nminute) - int(eminutes) == 55):
             for user in users:
                 bot.send_message(user, "Внимание! Событие " + event['name'] + " начинается через 5 минут!")
         return False
