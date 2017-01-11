@@ -1,8 +1,8 @@
-import json
 from threading import Thread
 import config
 import telebot, time, datetime
 schedule = []
+bot = telebot.TeleBot(config.token)
 
 def fillUsersFromFile():
     global users
@@ -12,17 +12,10 @@ def fillUsersFromFile():
     for suser in strUsers:
         users.append(int(suser))
 
-bot = telebot.TeleBot(config.token)
-users = []
-fillUsersFromFile()
-fle = open("timetable.txt", "r", encoding="utf8")
-text = fle.read().split("\n")
-botHumor = 0
-
-for t in text:
-    te = t.split("=")
-    schedule.append({'time': te[0], 'name': te[1]})
-
+def clearTimetableList():
+    global schedule
+    schedule = []
+    open("timetable.txt", "w", encoding="utf8")
 
 def addUserToList():
     global users
@@ -120,6 +113,15 @@ def printTimetable(message):
 def polling():
     bot.polling(none_stop=True)
 
+users = []
+fillUsersFromFile()
+fle = open("timetable.txt", "r", encoding="utf8")
+text = fle.read().split("\n")
+botHumor = 0
+
+for t in text:
+    te = t.split("=")
+    schedule.append({'time': te[0], 'name': te[1]})
 
 if __name__ == '__main__':
     thread1 = Thread(target=polling)
