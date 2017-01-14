@@ -120,10 +120,13 @@ fillUsersFromFile()
 fle = open("timetable.txt", "r", encoding="utf8")
 text = fle.read().split("\n")
 botHumor = 0
-
-for t in text:
-    te = t.split("=")
-    schedule.append({'time': te[0], 'name': te[1]})
+try:
+    for t in text:
+        te = t.split("=")
+        schedule.append({'time': te[0], 'name': te[1]})
+except:
+    schedule
+    schedule = []
 
 if __name__ == '__main__':
     thread1 = Thread(target=polling)

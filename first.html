@@ -1,10 +1,21 @@
-<html>
+<html xmlns="http://www.w3.org/1999/html">
 
 <head>
-    <title>Первая страница</title>
+    <title>Управление ботом</title>
 </head>
 <body>
-Тест первой страницы <br />
-<input class="btn btn-info" type="submit" value="Тест"></input>
+<h1 style="align-content: center">Управление Telegram-ботом</h1> <br />
+<b>Выберите действия из списка и нажмите "Применить"</b> <br>
+<form method="post" enctype="multipart/form-data">
+
+    <input type="checkbox" name="doTimetableClear" value="true">Очистить расписание</input> <br>
+    <p><b>Введите новое расписание в поле ниже.</b> <br>
+    <textarea name="timetable" cols="40" rows="3"></textarea><br>
+    <input type="radio" name="whatDoWithNewTimetable" value="append" checked>Добавить к текущему расписанию</input><br>
+    <input type="radio" name="whatDoWithNewTimetable" value="rewrite">Перезаписать файл раписания</input><br>
+    </p>
+    <input class="btn btn-info" type="submit" value="Применить"> <br>
+    {{message}}
+</form>
 </body>
 </html>
