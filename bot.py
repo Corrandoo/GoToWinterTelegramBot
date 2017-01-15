@@ -4,6 +4,7 @@ from threading import Thread
 import config
 import telebot, time, datetime
 schedule = []
+users = []
 bot = telebot.TeleBot(config.token)
 
 def fillUsersFromFile():
@@ -11,27 +12,22 @@ def fillUsersFromFile():
     usfile = open("users.txt", "r", encoding="utf8")
     strUsers = usfile.read().split("//")
     users.clear()
-    for suser in strUsers:
-        users.append(int(suser))
+    try:
+        for suser in strUsers:
+            users.append(int(suser))
+    except:
+        pass
 
 def clearTimetableList():
     global schedule
     schedule = []
     open("timetable.txt", "w", encoding="utf8")
 
-def addUserToList():
+def refillUserList(): # This method refreshes file users.txt. It can add or remove user from file.
     global users
     usfile = open("users.txt", "w", encoding="utf8")
     for user in users:
-        if user != users[-1] or len(users) == 1:
-            usfile.write(str(user) + "//")
-        else:
-            usfile.write(str(user))
-def removeUserFromList():
-    global users
-    usfile = open("users.txt", "w", encoding="utf8")
-    for user in users:
-        if user != users[-1] or len(users) == 1:
+        if user != users[-1]:
             usfile.write(str(user) + "//")
         else:
             usfile.write(str(user))
@@ -77,7 +73,7 @@ def handle_add_goto_timetable(message):
             return
     users.append(message.chat.id)
     bot.send_message(message.chat.id, "Вы добавлены в рассылку расписания GoTo!")
-    addUserToList()
+    refillUserList()
 
 @bot.message_handler(commands=["unsubscribe"])
 def handle_unsubscribe_goto_timetable(message):
@@ -85,7 +81,7 @@ def handle_unsubscribe_goto_timetable(message):
         if message.chat.id == user:
             users.remove(message.chat.id)
             bot.send_message(message.chat.id, "Вы удалены из рассылки расписания GoTo.")
-            removeUserFromList()
+            refillUserList()
             return
     bot.send_message(message.chat.id, "Вы уже удалялись из рассылки расписания GoTo.")
 @bot.message_handler(commands=["start", "help"])
@@ -115,7 +111,7 @@ def printTimetable(message):
 def polling():
     bot.polling(none_stop=True)
 
-users = []
+
 fillUsersFromFile()
 fle = open("timetable.txt", "r", encoding="utf8")
 text = fle.read().split("\n")
@@ -123,9 +119,14 @@ botHumor = 0
 try:
     for t in text:
         te = t.split("=")
+        tt = te[0].split("")
+        try:
+            if tt[0] == '0' and tt[2] == ':':
+                te[0] = tt[1] + tt[2] + tt[3] + tt[4]
+        except:
+            te[0] = tt[1]+tt[2]+tt[3]
         schedule.append({'time': te[0], 'name': te[1]})
 except:
-    schedule
     schedule = []
 
 if __name__ == '__main__':
