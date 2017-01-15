@@ -8,7 +8,7 @@ class MainHandler(tornado.web.RequestHandler):
     def post(self):
         clear = self.get_argument('doTimetableClear', 'false')
         newTimetable = self.get_argument('timetable', 'none')
-        doWithTt = self.get_argument('whatDoWithNewTimetable')
+        doWithTt = self.get_argument('whatDoWithNewTimetable', 'none')
         if clear == 'true':
             bot.clearTimetableList()
         if newTimetable == '\n':

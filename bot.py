@@ -5,7 +5,11 @@ import config
 import telebot, time, datetime
 schedule = []
 users = []
+usernames = {}
 bot = telebot.TeleBot(config.token)
+
+def polling():
+    bot.polling(none_stop=True)
 
 def fillUsersFromFile():
     global users
@@ -108,9 +112,22 @@ def printTimetable(message):
         bot.send_message(user, event['time'] + " " + event['name'])
         time.sleep(0.5)
 
-def polling():
-    bot.polling(none_stop=True)
-
+@bot.message_handler(commands=["setname"])
+def wSetNameForUser(message):
+    bot.send_message(message.chat.id, "Сейчас вам предстоит установить свое имя.")
+    bot.send_message(message.chat.id, "Оно будет использоваться ботом для создания индивидуальных напоминаний и выдачи персональных ачивок.")
+    bot.send_message(message.chat.id, "Вы всегда сможете его изменить, отправив команду /setname")
+    msg = bot.send_message(message.chat.id, "Введите свое имя и фамилию через одинарный пробел одним сообщением в любой раскладке.")
+    bot.register_next_step_handler(msg, setNameForUser)
+def setNameForUser(message):
+    global usernames
+    fname = message.text.split(" ")[0]
+    sname = message.text.split(" ")[1]
+    id = message.chat.id
+    usernames[id] = fname + " " + sname
+    bot.send_message(id, usernames[id])
+    file = open("usernames.txt", "a", encoding="utf8")
+    file.write(str(id) + usernames[id] + "\n")
 
 fillUsersFromFile()
 fle = open("timetable.txt", "r", encoding="utf8")
