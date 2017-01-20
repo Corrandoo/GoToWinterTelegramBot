@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from threading import Thread
-import config
+import config, database_connector
 import telebot, time, datetime
 schedule = []
 users = []
@@ -11,30 +11,10 @@ bot = telebot.TeleBot(config.token)
 def polling():
     bot.polling(none_stop=True)
 
-def fillUsersFromFile():
-    global users
-    usfile = open("users.txt", "r", encoding="utf8")
-    strUsers = usfile.read().split("//")
-    users.clear()
-    try:
-        for suser in strUsers:
-            users.append(int(suser))
-    except:
-        pass
-
 def clearTimetableList():
     global schedule
     schedule = []
     open("timetable.txt", "w", encoding="utf8")
-
-def refillUserList(): # This method refreshes file users.txt. It can add or remove user from file.
-    global users
-    usfile = open("users.txt", "w", encoding="utf8")
-    for user in users:
-        if user != users[-1]:
-            usfile.write(str(user) + "//")
-        else:
-            usfile.write(str(user))
 
 
 def checkEventNow(event):
@@ -71,21 +51,26 @@ def eventWriter():
 
 @bot.message_handler(commands=["subscribe"])
 def handle_add_goto_timetable(message):
+    first_name = bot.get_chat(message.chat.id).first_name
+    last_name = bot.get_chat(message.chat.id).last_name
+    username = bot.get_chat(message.chat.id).username
+    database_connector.add_new_user_to_database(message.chat.id, first_name, last_name, username)
+
+
     for user in users:
         if user == message.chat.id:
             bot.send_message(user, "Вы уже добавлялись в рассылку расписания GoTo!")
             return
     users.append(message.chat.id)
     bot.send_message(message.chat.id, "Вы добавлены в рассылку расписания GoTo!")
-    refillUserList()
 
 @bot.message_handler(commands=["unsubscribe"])
 def handle_unsubscribe_goto_timetable(message):
+    database_connector.remove_user_from_database(message.chat.id)
     for user in users:
         if message.chat.id == user:
             users.remove(message.chat.id)
             bot.send_message(message.chat.id, "Вы удалены из рассылки расписания GoTo.")
-            refillUserList()
             return
     bot.send_message(message.chat.id, "Вы уже удалялись из рассылки расписания GoTo.")
 @bot.message_handler(commands=["start", "help"])
@@ -112,10 +97,7 @@ def printTimetable(message):
         bot.send_message(user, event['time'] + " " + event['name'])
         time.sleep(0.5)
 
-    n = bot.get_chat(message.chat.id)
-    bot.send_message(message.chat.id, str(n))
 
-fillUsersFromFile()
 fle = open("timetable.txt", "r", encoding="utf8")
 text = fle.read().split("\n")
 botHumor = 0
