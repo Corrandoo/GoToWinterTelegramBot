@@ -8,6 +8,13 @@ users = []
 usernames = {}
 bot = telebot.TeleBot(config.token)
 
+def fill_users_from_database():
+    global users
+    users.clear()
+    dbusers = database_connector.get_all_database()
+    for dbuser in dbusers:
+        users.append(dbuser[0])
+
 def polling():
     bot.polling(none_stop=True)
 
@@ -54,19 +61,17 @@ def handle_add_goto_timetable(message):
     first_name = bot.get_chat(message.chat.id).first_name
     last_name = bot.get_chat(message.chat.id).last_name
     username = bot.get_chat(message.chat.id).username
-    database_connector.add_new_user_to_database(message.chat.id, first_name, last_name, username)
-
-
-    for user in users:
-        if user == message.chat.id:
-            bot.send_message(user, "Вы уже добавлялись в рассылку расписания GoTo!")
-            return
-    users.append(message.chat.id)
-    bot.send_message(message.chat.id, "Вы добавлены в рассылку расписания GoTo!")
+    resultOfAdding = database_connector.add_new_user_to_database(message.chat.id, first_name, last_name, username)
+    if resultOfAdding == "UniqueError":
+        bot.send_message(message.chat.id, "Вы уже добавлялись в рассылку расписания GoTo!")
+        return
+    else:
+        bot.send_message(message.chat.id, "Вы добавлены в рассылку расписания GoTo!")
+    fill_users_from_database()
 
 @bot.message_handler(commands=["unsubscribe"])
 def handle_unsubscribe_goto_timetable(message):
-    database_connector.remove_user_from_database(message.chat.id)
+    result = database_connector.remove_user_from_database(message.chat.id)
     for user in users:
         if message.chat.id == user:
             users.remove(message.chat.id)
@@ -113,6 +118,8 @@ try:
         schedule.append({'time': te[0], 'name': te[1]})
 except:
     schedule = []
+
+fill_users_from_database()
 
 if __name__ == '__main__':
     thread1 = Thread(target=polling)
